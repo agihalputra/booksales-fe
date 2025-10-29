@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getBooks } from "../../../_services/books";
+import { deleteBook, getBooks } from "../../../_services/books";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function AdminBooks() {
@@ -28,10 +28,12 @@ export default function AdminBooks() {
     setOpenDropdown(null);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm(`Are you sure you want to delete book ID: ${id}?`)) {
-      console.log(`Deleting book with ID: ${id}`);
-      setOpenDropdown(null);
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this book?");
+
+    if (confirmDelete) {
+      await deleteBook(id);
+      setBooks(books.filter((book) => book.id !== id));
     }
   };
 
@@ -122,12 +124,20 @@ export default function AdminBooks() {
                     <td className="px-4 py-3">{book.price}</td>
                     <td className="px-4 py-3">{book.stock}</td>
                     <td className="px-4 py-3">
-                      <img
-                        src={book.cover}
-                        alt="cover"
-                        className="w-12 h-12 object-cover rounded"
-                      />
+                      {book.cover_photo ? (
+                        <a
+                          href={`http://127.0.0.1:8000/storage/${book.cover_photo}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-indigo-600 hover:underline"
+                        >
+                          {book.cover_photo}
+                        </a>
+                      ) : (
+                        "-"
+                      )}
                     </td>
+
                     <td className="px-4 py-3">{book.genre?.name}</td>
                     <td className="px-4 py-3">{book.author?.name}</td>
                     <td className="px-4 py-3 text-right relative">
