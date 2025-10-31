@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { showBook } from "../../../_services/books";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { bookImageStorage } from "../../../_api";
+import { createTransactions } from "../../../_services/transactions";
 
 export default function ShowBook() {
   const { id } = useParams();
   const [book, setBook] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+
+  const navigate = useNavigate();
+  const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +44,30 @@ export default function ShowBook() {
     );
   }
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!accessToken) {
+      alert("Silahkan login terlebih dahulu.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const payload = {
+        book_id: book.id,
+        quantity: quantity,
+      }
+
+      await createTransactions(payload);
+      alert("Pembelian berhasil!");
+    } catch (error) {
+        console.log(error);
+        throw error;
+      }
+    }
+
+
   return (
     <section className="py-12 bg-gray-50 dark:bg-gray-900 antialiased transition-all duration-300">
       <div className="max-w-screen-xl px-4 mx-auto 2xl:px-0">
@@ -71,32 +100,32 @@ export default function ShowBook() {
             </p>
 
             <div className="flex items-center gap-4">
-              <button
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
-                title="Add to cart"
-              >
-                <svg
-                  className="w-5 h-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.293 6.293A1 1 0 007.68 21h8.64a1 1 0 00.973-.707L19 13M9 21a2 2 0 104 0m-4 0a2 2 0 104 0"
+              <form onSubmit={handleSubmit} className="mt-6 sm:mt-8 space-y-4">
+                <div>
+                  <label
+                    htmlFor="quantity"
+                    className="block text-sm font-medium text-gray-700 dark:text-white"
+                  >
+                    Jumlah
+                  </label>
+                  <input
+                    type="number"
+                    id="quantity"
+                    name="quantity"
+                    value={quantity}
+                    min={1}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    className="mt-1 block w-24 px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-dray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                   />
-                </svg>
-                Add to Cart
-              </button>
+                </div>
 
-              <button
-                className="px-6 py-3 border border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-xl font-medium transition-all duration-300"
-              >
-                Wishlist
-              </button>
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+                >
+                  Beli
+                </button>
+              </form>
             </div>
 
             <hr className="my-6 border-gray-200 dark:border-gray-700" />

@@ -11,7 +11,7 @@ export default function Navbar() {
       await logout({ token });
       localStorage.removeItem("userInfo");
     }
-    navigate("/login");
+    navigate("/");
   }
 
   return (
